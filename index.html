@@ -177,7 +177,48 @@
       return{title:"Great work!", message:"You’re showing strong wellbeing...", color:'bg-blue-100 text-blue-800 border-blue-300'};
     }
     function displayResults(){ const fb=getResultFeedback(totalScore); feedbackTitle.textContent=fb.title; feedbackMessage.textContent=fb.message; feedbackCard.className=`w-full p-8 rounded-2xl border-2 ${fb.color}`; lucide.createIcons(); }
-    function downloadResults(){ if(answers.some(a=>a!=null)){ const data={timestamp:new Date().toISOString(), answers:questions.map((q,i)=>({question:q.text, answer:answers[i]})), totalScore}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`quiz_results_${Date.now()}.json`; document.body.append(a); a.click(); a.remove(); URL.revokeObjectURL(url); messageBox.textContent="Results downloaded.";} else messageBox.textContent="Please complete the quiz first."; }
+    function downloadResults() {
+      if (!answers.some(a => a != null)) {
+        messageBox.textContent = "Please complete the quiz before generating your report.";
+        return;
+      }
+      // You can change this to your staff member's email
+      const staffEmail = 'wellbeing@university.edu';
+
+      // Build a friendly text report
+      let report = `Student Wellbeing Check-In Report
+`;
+      report += `Date: ${new Date().toLocaleString()}
+
+`;
+
+      questions.forEach((q, i) => {
+        const val = answers[i];
+        const option = optionIcons.find(o => o.value === val);
+        report += `${i + 1}. ${q.text}
+`;
+        report += `   Your response: ${option.label}
+
+`;
+      });
+
+      report += `Please send this report to ${staffEmail} for follow-up and support.
+`;
+
+      // Trigger download
+      const blob = new Blob([report], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'wellbeing-report.txt';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      messageBox.textContent = "Your wellbeing report is ready to download.";
+    }
+
     function restartQuiz(){ currentScreen='welcome'; currentQuestionIndex=0; answers=Array(10).fill(null); totalScore=0; selectedAnswerValue=null; messageBox.textContent="Welcome!"; displayScreen('welcome'); }
 
     // Events
@@ -194,3 +235,4 @@
   </script>
 </body>
 </html>
+
