@@ -20,27 +20,25 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-primary-light to-purple-100 flex items-center justify-center p-6 font-sans">
-  <div class="relative bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 max-w-3xl w-full mx-auto">
+  <div class="relative bg-white/70 backdrop-blur-lg rounded-3xl shadow-2xl p-10 max-w-3xl w-full mx-auto">
     <!-- Welcome Screen -->
-    <div id="welcome-screen" class="flex flex-col items-center text-center space-y-4">
+    <div id="welcome-screen" class="flex flex-col items-center text-center space-y-6">
       <h1 class="text-5xl font-extrabold text-primary">Student Wellbeing Check-In</h1>
-      <p class="text-lg text-gray-800 max-w-lg">A quick, private questionnaire to reflect on your wellbeing. It takes about 2 minutes, and you’ll get tailored feedback.</p>
-      <p class="text-sm text-gray-600 max-w-md">Your responses are confidential and not shared without consent.</p>
-      <button id="start-quiz-button" class="px-8 py-4 bg-gradient-to-r from-primary to-accent text-white font-bold rounded-full shadow-lg transform transition duration-300 hover:scale-105">
+      <p class="text-lg text-gray-700 max-w-lg">
+        A quick, private questionnaire to reflect on your wellbeing. It takes about 2 minutes, and you’ll get tailored feedback.
+      </p>
+      <button id="start-quiz-button" class="px-8 py-4 bg-gradient-to-r from-primary to-accent text-white font-bold rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:from-accent hover:to-primary">
         Start Quiz
       </button>
     </div>
 
     <!-- Quiz Screen -->
-    <div id="quiz-screen" class="hidden flex flex-col items-center w-full" aria-live="polite">
-      <div class="w-full bg-gray-200/50 rounded-full h-3 overflow-hidden mb-6" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+    <div id="quiz-screen" class="hidden flex flex-col items-center w-full">
+      <div class="w-full bg-gray-200/50 rounded-full h-3 overflow-hidden mb-6">
         <div id="progress-bar" class="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500"></div>
       </div>
-      <div class="flex items-center mb-8 relative">
-        <h2 id="question-text" class="text-3xl font-semibold text-gray-800 text-center"></h2>
-        <!-- Tooltip icon -->
-        <i id="question-tooltip" data-lucide="help-circle" class="lucide text-gray-600 ml-2 cursor-pointer" tabindex="0" aria-label="Question info"></i>
-      </div>
+      <p id="question-progress" class="text-gray-600 mb-2">Question 1 of 10</p>
+      <h2 id="question-text" class="text-3xl font-semibold text-gray-800 text-center mb-8"></h2>
       <div id="options-container" class="grid grid-cols-1 gap-4 w-full max-w-md"></div>
       <button id="next-question-button" class="mt-8 px-6 py-3 rounded-full text-white font-bold shadow-lg bg-gray-400 cursor-not-allowed transition-all duration-300" disabled>
         Next
@@ -48,26 +46,26 @@
     </div>
 
     <!-- Results Screen -->
-    <div id="results-screen" class="hidden flex flex-col items-center text-center space-y-6" aria-live="polite">
+    <div id="results-screen" class="hidden flex flex-col items-center text-center space-y-6">
       <div id="feedback-card" class="w-full p-8 rounded-2xl border-2">
         <h2 id="feedback-title" class="text-4xl font-extrabold mb-4"></h2>
-        <p id="feedback-message" class="text-lg text-gray-800"></p>
+        <p id="feedback-message" class="text-lg text-gray-700"></p>
       </div>
       <div class="flex flex-wrap justify-center gap-4">
-        <button id="explore-resources-button" class="flex items-center gap-2 px-6 py-3 bg-accent text-white font-bold rounded-full shadow-lg hover:scale-105">
+        <button id="explore-resources-button" class="flex items-center gap-2 px-6 py-3 bg-accent text-white font-bold rounded-full shadow-lg transform transition hover:scale-105">
           <i data-lucide="info" class="lucide"></i> Support Resources
         </button>
-        <button id="restart-quiz-button" class="px-6 py-3 bg-gray-500 text-white font-bold rounded-full shadow hover:scale-105">
+        <button id="restart-quiz-button" class="px-6 py-3 bg-gray-500 text-white font-bold rounded-full shadow transform transition hover:scale-105">
           Restart
         </button>
-        <button id="download-results-button" class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-full shadow hover:scale-105">
+        <button id="download-results-button" class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-full shadow transform transition hover:scale-105">
           <i data-lucide="download" class="lucide"></i> Download
         </button>
       </div>
     </div>
 
     <!-- Resource Modal -->
-    <div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
         <button id="modal-close-button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
           <i data-lucide="x" class="lucide"></i>
@@ -76,266 +74,138 @@
           <i data-lucide="check-circle" class="lucide"></i> Resource
         </h3>
         <p id="modal-description" class="text-gray-700 mb-6"></p>
-        <a id="modal-link" class="inline-block px-6 py-2 bg-gradient-to-r from-accent to-primary text-white font-bold rounded-full transition hover:opacity-90 hidden" target="_blank"></a>
-        <button id="modal-continue-button" class="mt-6 w-full px-6 py-3 bg-green-600 text-white font-bold rounded-full shadow hover:scale-105">
+        <a id="modal-link" href="#" target="_blank" class="inline-block px-6 py-2 bg-gradient-to-r from-accent to-primary text-white font-bold rounded-full transition hover:opacity-90 hidden">
+          Visit
+        </a>
+        <button id="modal-continue-button" class="mt-6 w-full px-6 py-3 bg-green-600 text-white font-bold rounded-full shadow transform transition hover:scale-105">
           Continue
         </button>
       </div>
     </div>
 
-    <!-- Custom Tooltip (for question info) -->
-    <div id="custom-tooltip" style="display:none; position:absolute; z-index:1000;" class="p-2 bg-gray-800 text-white rounded shadow text-sm max-w-xs"></div>
-
     <!-- Status Message -->
-    <div id="message-box" class="mt-6 p-4 bg-white/50 backdrop-blur rounded-xl text-center text-primary font-semibold" role="status"></div>
-
-    <!-- Footer -->
-    <p class="mt-4 text-xs text-gray-500 text-center">Created by Student Life Team, University of London Worldwide</p>
+    <div id="message-box" class="mt-6 p-4 bg-white/50 backdrop-blur rounded-xl text-center text-primary font-semibold"></div>
   </div>
 
   <!-- Quiz Logic -->
   <script>
-    // Data definitions - example questions (expand as needed)
-    const questions = [
-      {
-        id: 1,
-        text: "I feel a sense of belonging within the online university community.",
-        tooltip: "‘Sense of belonging’ means feeling connected to peers in group discussions, online socials, and collaborative activities.",
-        resource: {
-          title: "Building Community Online",
-          description: "Engage in online forums, virtual study groups, and university social events to connect with peers.",
-          link: "https://example.com/community-resources"
-        }
-      },
-      {
-        id: 2,
-        text: "I am able to manage my academic workload without feeling overwhelmed.",
-        tooltip: "Effective workload management involves planning tasks, prioritising deadlines, and taking regular breaks.",
-        resource: {
-          title: "Effective Time Management",
-          description: "Learn strategies like time blocking, prioritizing tasks, and breaking down large assignments.",
-          link: "https://example.com/time-management-tips"
-        }
-      },
-      {
-        id: 3,
-        text: "I have access to support when I need it (academic, wellbeing, technical).",
-        tooltip: "Knowing where and how to seek help is essential. Support can include tutors, counselors, IT helpdesks, or peer mentors.",
-        resource: {
-          title: "Finding Support",
-          description: "Discover the range of support services available for students, from academic advisors to mental health resources.",
-          link: "https://example.com/support-services"
-        }
-      },
-      {
-        id: 4,
-        text: "I am able to maintain a healthy study-life balance.",
-        tooltip: "A healthy balance includes time for rest, hobbies, socializing, and self-care alongside academic responsibilities.",
-        resource: {
-          title: "Study-Life Balance",
-          description: "Tips for balancing studies with personal life, avoiding burnout, and enjoying university.",
-          link: "https://example.com/study-life-balance"
-        }
-      },
-      {
-        id: 5,
-        text: "I feel motivated about my studies and future goals.",
-        tooltip: "Motivation can fluctuate. Setting clear, achievable goals and celebrating progress helps maintain it.",
-        resource: {
-          title: "Staying Motivated",
-          description: "Learn how to set goals and stay motivated throughout your academic journey.",
-          link: "https://example.com/motivation"
-        }
-      }
-    ];
-
-    const optionIcons = [
-      { value: 1, label: 'None of the time', icon: 'frown', color: 'text-red-500' },
-      { value: 2, label: 'Rarely', icon: 'meh', color: 'text-orange-500' },
-      { value: 3, label: 'Some of the time', icon: 'smile', color: 'text-yellow-500' },
-      { value: 4, label: 'Often', icon: 'laugh', color: 'text-lime-500' },
-      { value: 5, label: 'All of the time', icon: 'smile', color: 'text-green-500' }
-    ];
-
-    // State variables
+    let currentScreen = 'welcome';
     let currentQuestionIndex = 0;
-    let answers = Array(questions.length).fill(null);
+    let answers = Array(10).fill(null);
     let totalScore = 0;
     let selectedAnswerValue = null;
 
-    // DOM references
     const welcomeScreen = document.getElementById('welcome-screen');
     const quizScreen = document.getElementById('quiz-screen');
     const resultsScreen = document.getElementById('results-screen');
     const messageBox = document.getElementById('message-box');
     const resourceModal = document.getElementById('resource-modal');
+
     const startQuizButton = document.getElementById('start-quiz-button');
     const progressBar = document.getElementById('progress-bar');
+    const questionProgress = document.getElementById('question-progress');
     const questionText = document.getElementById('question-text');
-    const questionTooltip = document.getElementById('question-tooltip');
     const optionsContainer = document.getElementById('options-container');
     const nextQuestionButton = document.getElementById('next-question-button');
+
     const feedbackCard = document.getElementById('feedback-card');
     const feedbackTitle = document.getElementById('feedback-title');
     const feedbackMessage = document.getElementById('feedback-message');
     const exploreResourcesButton = document.getElementById('explore-resources-button');
     const restartQuizButton = document.getElementById('restart-quiz-button');
     const downloadResultsButton = document.getElementById('download-results-button');
+
     const modalCloseButton = document.getElementById('modal-close-button');
     const modalTitle = document.getElementById('modal-title');
     const modalDescription = document.getElementById('modal-description');
     const modalLink = document.getElementById('modal-link');
     const modalContinueButton = document.getElementById('modal-continue-button');
-    const customTooltip = document.getElementById('custom-tooltip');
 
-    // Display appropriate screen
-    function displayScreen(screen) {
+    const questions = [{ id: 1, text: "I feel a sense of belonging within the online university community.", resource: { title: "Building Community Online", description: "Engage in online forums, virtual study groups, and university social events to connect with peers.", link: "https://example.com/community-resources" } }, { id: 2, text: "I am able to manage my academic workload without feeling overwhelmed.", resource: { title: "Effective Time Management", description: "Learn strategies like time blocking, prioritizing tasks, and breaking down large assignments.", link: "https://example.com/time-management-tips" } }, { id: 3, text: "I have a good balance between my studies and personal life.", resource: { title: "Achieving Work-Life Balance", description: "Set boundaries, schedule leisure time, and ensure you have activities outside of academics.", link: "https://example.com/balance-tips" } }, { id: 4, text: "I am able to maintain my physical health while studying online.", resource: { title: "Staying Active and Healthy", description: "Incorporate short exercise breaks, maintain good posture, and ensure your study space is ergonomic.", link: "https://example.com/physical-health" } }, { id: 5, text: "I get enough sleep to feel rested and alert.", resource: { title: "Sleep Hygiene Course", description: "Improve your sleep quality by establishing a consistent sleep schedule, creating a relaxing bedtime routine, and optimizing your sleep environment.", link: "https://example.com/sleep-hygiene-course" } }, { id: 6, text: "I’ve been dealing with problems well.", resource: { title: "Coping Strategies", description: "Develop healthy coping mechanisms like journaling, mindfulness, or talking to a trusted friend or mentor.", link: "https://example.com/coping-strategies" } }, { id: 7, text: "I have people I can talk to when I feel stressed or overwhelmed.", resource: { title: "Building a Support Network", description: "Identify friends, family, or university support services you can reach out to for emotional support.", link: "https://example.com/support-network" } }, { id: 8, text: "I’ve been feeling good about myself.", resource: { title: "Boosting Self-Esteem", description: "Practice self-compassion, celebrate small victories, and focus on your strengths.", link: "https://example.com/self-esteem-tips" } }, { id: 9, text: "I eat a balanced and nutritious diet regularly.", resource: { title: "Healthy Eating for Students", description: "Plan your meals, choose nutrient-dense foods, and avoid excessive processed snacks.", link: "https://example.com/nutrition-guide" } }, { id: 10, text: "I feel a sense of purpose or direction in my life.", resource: { title: "Finding Your Purpose", description: "Reflect on your values, set meaningful goals, and explore activities that align with your passions.", link: "https://example.com/purpose-exploration" } }];
+    const optionIcons = [{ value: 1, label: 'None of the time', icon: 'frown', color: 'text-red-500' }, { value: 2, label: 'Rarely', icon: 'meh', color: 'text-orange-500' }, { value: 3, label: 'Some of the time', icon: 'smile', color: 'text-yellow-500' }, { value: 4, label: 'Often', icon: 'laugh', color: 'text-lime-500' }, { value: 5, label: 'All of the time', icon: 'smile', color: 'text-green-500' }];
+
+    function displayScreen(screenName) {
       welcomeScreen.classList.add('hidden');
       quizScreen.classList.add('hidden');
       resultsScreen.classList.add('hidden');
       resourceModal.classList.add('hidden');
-      if (screen === 'welcome') welcomeScreen.classList.remove('hidden');
-      if (screen === 'quiz') { quizScreen.classList.remove('hidden'); renderQuestion(); }
-      if (screen === 'results') { resultsScreen.classList.remove('hidden'); displayResults(); }
+
+      if (screenName === 'welcome') welcomeScreen.classList.remove('hidden');
+      else if (screenName === 'quiz') { quizScreen.classList.remove('hidden'); renderQuestion(); }
+      else if (screenName === 'results') { resultsScreen.classList.remove('hidden'); displayResults(); }
       lucide.createIcons();
     }
 
-    // Render current question
     function renderQuestion() {
       const q = questions[currentQuestionIndex];
+      questionProgress.textContent = `Question ${currentQuestionIndex+1} of ${questions.length}`;
       questionText.textContent = q.text;
-      // Native browser tooltip for fallback
-      questionTooltip.title = q.tooltip;
-      progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+      progressBar.style.width = `${((currentQuestionIndex+1)/questions.length)*100}%`;
       optionsContainer.innerHTML = '';
       selectedAnswerValue = answers[currentQuestionIndex];
-
       optionIcons.forEach(opt => {
-        const label = document.createElement('label');
-        label.className = selectedAnswerValue === opt.value
-          ? 'flex items-center p-4 border-purple-500 bg-purple-100 shadow-md rounded-lg cursor-pointer'
-          : 'flex items-center p-4 border-gray-200 bg-white hover:bg-gray-50 rounded-lg cursor-pointer';
-
-        const input = document.createElement('input');
-        input.type = 'radio';
-        input.name = `q-${q.id}`;
-        input.value = opt.value;
-        input.checked = selectedAnswerValue === opt.value;
-        input.className = 'form-radio h-5 w-5 text-primary';
-        input.addEventListener('change', () => handleAnswerSelection(opt.value));
-
-        const span = document.createElement('span');
-        span.className = 'ml-4 text-lg text-gray-800 flex items-center gap-2';
-        span.innerHTML = `<i data-lucide="${opt.icon}" class="lucide ${opt.color}"></i> ${opt.label}`;
-
-        label.append(input, span);
-        optionsContainer.append(label);
+        const lbl = document.createElement('label');
+        lbl.className = `flex items-center p-4 border rounded-lg cursor-pointer transition ${selectedAnswerValue===opt.value?'bg-purple-100 border-purple-500 shadow-md':'bg-white border-gray-200 hover:bg-gray-50'}`;
+        const inp = document.createElement('input'); inp.type='radio'; inp.name=`q-${q.id}`; inp.value=opt.value; inp.checked = selectedAnswerValue===opt.value;
+        inp.className='form-radio h-5 w-5 text-primary'; inp.addEventListener('change',()=>handleAnswerSelection(opt.value));
+        const span=document.createElement('span'); span.className='ml-4 text-lg text-gray-700 flex items-center gap-2'; span.innerHTML=`<i data-lucide="${opt.icon}" class="lucide ${opt.color}"></i> ${opt.label}`;
+        lbl.append(inp, span); optionsContainer.append(lbl);
       });
-
-      nextQuestionButton.disabled = selectedAnswerValue === null;
-      nextQuestionButton.className = selectedAnswerValue === null
-        ? 'mt-8 px-6 py-3 text-white bg-gray-400 cursor-not-allowed rounded-full'
-        : 'mt-8 px-6 py-3 text-white bg-green-600 cursor-pointer rounded-full hover:bg-green-700 hover:scale-105';
-
-      // Remove previous listeners
-      questionTooltip.onmouseenter = null;
-      questionTooltip.onmouseleave = null;
-      questionTooltip.onmousemove = null;
-      questionTooltip.onfocus = null;
-      questionTooltip.onblur = null;
-      questionTooltip.onclick = null;
-
-      // Custom tooltip handlers (desktop: hover/focus, mobile: click)
-      questionTooltip.onmouseenter = questionTooltip.onfocus = (e) => {
-        customTooltip.textContent = q.tooltip || '';
-        customTooltip.style.display = 'block';
-        positionCustomTooltip(e);
-      };
-      questionTooltip.onmousemove = (e) => {
-        positionCustomTooltip(e);
-      };
-      questionTooltip.onmouseleave = questionTooltip.onblur = () => {
-        customTooltip.style.display = 'none';
-      };
-      questionTooltip.onclick = (e) => {
-        // For mobile: toggle tooltip
-        if (customTooltip.style.display === 'block') {
-          customTooltip.style.display = 'none';
-        } else {
-          customTooltip.textContent = q.tooltip || '';
-          customTooltip.style.display = 'block';
-          positionCustomTooltip(e);
-        }
-      };
-    }
-
-    function positionCustomTooltip(e) {
-      // Position the tooltip near the icon
-      let x = 0, y = 0;
-      if (e.touches && e.touches.length > 0) {
-        x = e.touches[0].pageX;
-        y = e.touches[0].pageY;
-      } else {
-        x = e.pageX;
-        y = e.pageY;
-      }
-      customTooltip.style.left = (x + 12) + 'px';
-      customTooltip.style.top = (y + 12) + 'px';
-    }
-
-    // Handle answer selection
-    function handleAnswerSelection(val) {
-      answers[currentQuestionIndex] = val;
-      renderQuestion();
-    }
-
-    // Show resource modal
-    function showResourceModal() {
-      const res = questions[currentQuestionIndex].resource;
-      modalTitle.textContent = res.title;
-      modalDescription.textContent = res.description;
-      if (res.link) {
-        modalLink.href = res.link;
-        modalLink.textContent = 'Visit Resource';
-        modalLink.classList.remove('hidden');
-      } else {
-        modalLink.classList.add('hidden');
-      }
-      resourceModal.classList.remove('hidden');
+      nextQuestionButton.disabled = selectedAnswerValue===null;
+      nextQuestionButton.className = selectedAnswerValue===null
+        ? 'mt-8 px-6 py-3 rounded-full text-white font-bold shadow-lg bg-gray-400 cursor-not-allowed'
+        : 'mt-8 px-6 py-3 rounded-full text-white font-bold shadow-lg bg-green-600 hover:bg-green-700 hover:scale-105 cursor-pointer';
       lucide.createIcons();
     }
 
-    // Hide modal
-    function hideResourceModal() {
-      resourceModal.classList.add('hidden');
+    function handleAnswerSelection(val) {
+      answers[currentQuestionIndex]=val; selectedAnswerValue=val; renderQuestion();
     }
 
-    // Go to next question or results
-    function goToNext() {
-      hideResourceModal();
-      if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        renderQuestion();
-      } else {
-        totalScore = answers.reduce((sum, ans) => sum + (ans || 0), 0);
-        displayScreen('results');
-      }
+    function showResourceModal(){
+      const r=questions[currentQuestionIndex].resource;
+      modalTitle.textContent=r.title; modalDescription.textContent=r.description;
+      if(r.link){ modalLink.href=r.link; modalLink.classList.remove('hidden'); } else modalLink.classList.add('hidden');
+      resourceModal.classList.remove('hidden'); lucide.createIcons();
     }
-
-    // Generate and trigger download report
+    function hideResourceModal(){ resourceModal.classList.add('hidden'); }
+    function goToNext(){ hideResourceModal(); if(currentQuestionIndex<questions.length-1){ currentQuestionIndex++; renderQuestion(); messageBox.textContent=`Question ${currentQuestionIndex+1} of ${questions.length}`; } else { totalScore = answers.reduce((a,b)=>a+(b||0),0); messageBox.textContent="Quiz completed! See your results."; displayScreen('results'); }}
+    function getResultFeedback(score){
+      if(score<=20) return{title:"We’re here to help.", message:"Your responses suggest that you're facing some serious challenges...", color:'bg-red-100 text-red-800 border-red-300'};
+      if(score<=30) return{title:"Let’s work on this together.", message:"There are areas where your wellbeing could be improved...", color:'bg-yellow-100 text-yellow-800 border-yellow-300'};
+      if(score<=40) return{title:"You’re doing fairly well!", message:"Your wellbeing appears to be in a good place...", color:'bg-green-100 text-green-800 border-green-300'};
+      return{title:"Great work!", message:"You’re showing strong wellbeing...", color:'bg-blue-100 text-blue-800 border-blue-300'};
+    }
+    function displayResults(){ const fb=getResultFeedback(totalScore); feedbackTitle.textContent=fb.title; feedbackMessage.textContent=fb.message; feedbackCard.className=`w-full p-8 rounded-2xl border-2 ${fb.color}`; lucide.createIcons(); }
     function downloadResults() {
       if (!answers.some(a => a != null)) {
-        messageBox.textContent = 'Please complete the quiz before downloading.';
+        messageBox.textContent = "Please complete the quiz before generating your report.";
         return;
       }
-      let report = 'Student Wellbeing Check-In Report\n';
-      report += `Date: ${new Date().toLocaleString()}\n\n`;
-      questions.forEach((q, i) => {
-        const opt = optionIcons.find(o => o.value === answers[i]);
-        report += `${i + 1}. ${q.text}\n   Your response: ${opt ? opt.label : 'No response'}\n\n`;
-      });
-      report += 'Please send this report to wellbeing@university.edu for follow-up and support.\n';
+      // You can change this to your staff member's email
+      const staffEmail = 'wellbeing@university.edu';
 
+      // Build a friendly text report
+      let report = `Student Wellbeing Check-In Report
+`;
+      report += `Date: ${new Date().toLocaleString()}
+
+`;
+
+      questions.forEach((q, i) => {
+        const val = answers[i];
+        const option = optionIcons.find(o => o.value === val);
+        report += `${i + 1}. ${q.text}
+`;
+        report += `   Your response: ${option.label}
+
+`;
+      });
+
+      report += `Please send this report to ${staffEmail} for follow-up and support.
+`;
+
+      // Trigger download
       const blob = new Blob([report], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -346,43 +216,22 @@
       a.remove();
       URL.revokeObjectURL(url);
 
-      messageBox.textContent = 'Your wellbeing report is ready to download.';
+      messageBox.textContent = "Your wellbeing report is ready to download.";
     }
 
-    // Restart quiz
-    function restartQuiz() {
-      currentQuestionIndex = 0;
-      answers = Array(questions.length).fill(null);
-      totalScore = 0;
-      displayScreen('welcome');
-    }
+    function restartQuiz(){ currentScreen='welcome'; currentQuestionIndex=0; answers=Array(10).fill(null); totalScore=0; selectedAnswerValue=null; messageBox.textContent="Welcome!"; displayScreen('welcome'); }
 
-    // Show results
-    function getResultFeedback(score) {
-      if (score <= 10) return { title: "We’re here to help.", message: "Your responses suggest some serious challenges. Reach out for support.", color: 'bg-red-100 text-red-800 border-red-300' };
-      if (score <= 17) return { title: "Let’s work on this together.", message: "There are areas to improve. Small steps can help.", color: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
-      if (score <= 22) return { title: "You’re doing fairly well!", message: "Your wellbeing is good, but you can build on strengths.", color: 'bg-green-100 text-green-800 border-green-300' };
-      return { title: "Great work!", message: "You’re showing strong wellbeing. Keep it up!", color: 'bg-blue-100 text-blue-800 border-blue-300' };
-    }
+    // Events
+    startQuizButton.addEventListener('click',()=>{ messageBox.textContent="Quiz started!"; displayScreen('quiz'); });
+    nextQuestionButton.addEventListener('click',showResourceModal);
+    modalContinueButton.addEventListener('click',goToNext);
+    modalCloseButton.addEventListener('click',hideResourceModal);
+    restartQuizButton.addEventListener('click',restartQuiz);
+    downloadResultsButton.addEventListener('click',downloadResults);
+    exploreResourcesButton.addEventListener('click',()=>alert('Linking support resources...'));
 
-    function displayResults() {
-      const fb = getResultFeedback(totalScore);
-      feedbackTitle.textContent = fb.title;
-      feedbackMessage.textContent = fb.message;
-      feedbackCard.className = `w-full p-8 rounded-2xl border-2 ${fb.color}`;
-      lucide.createIcons();
-    }
-
-    // Event listeners
-    startQuizButton.addEventListener('click', () => displayScreen('quiz'));
-    nextQuestionButton.addEventListener('click', showResourceModal);
-    modalContinueButton.addEventListener('click', goToNext);
-    modalCloseButton.addEventListener('click', hideResourceModal);
-    downloadResultsButton.addEventListener('click', downloadResults);
-    restartQuizButton.addEventListener('click', restartQuiz);
-
-    // Initialize
-    window.onload = () => displayScreen('welcome');
+    // Init
+    window.onload=()=>{ displayScreen('welcome'); lucide.createIcons(); };
   </script>
 </body>
 </html>
