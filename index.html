@@ -38,7 +38,9 @@
       </div>
       <div class="flex items-center mb-8">
         <h2 id="question-text" class="text-3xl font-semibold text-gray-800 text-center"></h2>
-        <i id="question-tooltip" data-lucide="help-circle" class="lucide text-gray-600 ml-2 cursor-pointer" title=""></i>
+        <span id="question-tooltip-wrapper" class="ml-2 cursor-help" title="">
+          <i data-lucide="help-circle" class="lucide text-gray-600"></i>
+        </span>
       </div>
       <div id="options-container" class="grid grid-cols-1 gap-4 w-full max-w-md"></div>
       <button id="next-question-button" class="mt-8 px-6 py-3 rounded-full text-white font-bold shadow-lg bg-gray-400 cursor-not-allowed transition-all duration-300" disabled>
@@ -90,13 +92,32 @@
 
   <!-- Quiz Logic -->
   <script>
-    // State variables
+    // Data definitions
+    const questions = [
+      { id: 1, text: "I feel a sense of belonging within the online university community.", tooltip: "‘Sense of belonging’ means feeling connected to peers in group discussions, online socials, and collaborative activities.", resource: { title: "Building Community Online", description: "Engage in online forums, virtual study groups, and university social events to connect with peers.", link: "https://example.com/community-resources" } },
+      { id: 2, text: "I am able to manage my academic workload without feeling overwhelmed.", tooltip: "Effective workload management involves planning tasks, prioritising deadlines, and taking regular breaks.", resource: { title: "Effective Time Management", description: "Learn strategies like time blocking, prioritizing tasks, and breaking down large assignments.", link: "https://example.com/time-management-tips" } },
+      { id: 3, text: "I have a good balance between my studies and personal life.", tooltip: "Work-life balance means ensuring you schedule time for hobbies, relaxation, and socialising alongside studies.", resource: { title: "Achieving Work-Life Balance", description: "Set boundaries, schedule leisure time, and ensure you have activities outside of academics.", link: "https://example.com/balance-tips" } },
+      { id: 4, text: "I am able to maintain my physical health while studying online.", tooltip: "Maintaining health includes regular exercise, good posture, and healthy eating habits.", resource: { title: "Staying Active and Healthy", description: "Incorporate short exercise breaks, maintain good posture, and ensure your study space is ergonomic.", link: "https://example.com/physical-health" } },
+      { id: 5, text: "I get enough sleep to feel rested and alert.", tooltip: "Good sleep hygiene involves consistent bedtimes, a relaxing routine, and minimal screen time before sleep.", resource: { title: "Sleep Hygiene Course", description: "Improve your sleep quality by establishing a consistent sleep schedule, creating a relaxing bedtime routine, and optimizing your sleep environment.", link: "https://example.com/sleep-hygiene-course" } },
+      { id: 6, text: "I’ve been dealing with problems well.", tooltip: "Coping well can include problem-solving, seeking support, or practicing mindfulness.", resource: { title: "Coping Strategies", description: "Develop healthy coping mechanisms like journaling, mindfulness, or talking to a trusted friend or mentor.", link: "https://example.com/coping-strategies" } },
+      { id: 7, text: "I have people I can talk to when I feel stressed or overwhelmed.", tooltip: "A support network means trusted friends, family, or university services you can reach out to.", resource: { title: "Building a Support Network", description: "Identify friends, family, or university support services you can reach out to for emotional support.", link: "https://example.com/support-network" } },
+      { id: 8, text: "I’ve been feeling good about myself.", tooltip: "Feeling good involves self-compassion, recognizing achievements, and positive self-talk.", resource: { title: "Boosting Self-Esteem", description: "Practice self-compassion, celebrate small victories, and focus on your strengths.", link: "https://example.com/self-esteem-tips" } },
+      { id: 9, text: "I eat a balanced and nutritious diet regularly.", tooltip: "A balanced diet includes fruits, vegetables, protein, and whole grains in the right proportions.", resource: { title: "Healthy Eating for Students", description: "Plan your meals, choose nutrient-dense foods, and avoid excessive processed snacks.", link: "https://example.com/nutrition-guide" } },
+      { id: 10, text: "I feel a sense of purpose or direction in my life.", tooltip: "Finding purpose involves setting meaningful goals and aligning activities with personal values.", resource: { title: "Finding Your Purpose", description: "Reflect on your values, set meaningful goals, and explore activities that align with your passions.", link: "https://example.com/purpose-exploration" } }
+    ];
+    const optionIcons = [
+      { value: 1, label: 'None of the time', icon: 'frown', color: 'text-red-500' },
+      { value: 2, label: 'Rarely', icon: 'meh', color: 'text-orange-500' },
+      { value: 3, label: 'Some of the time', icon: 'smile', color: 'text-yellow-500' },
+      { value: 4, label: 'Often', icon: 'laugh', color: 'text-lime-500' },
+      { value: 5, label: 'All of the time', icon: 'smile', color: 'text-green-500' }
+    ];
+    // State
     let currentQuestionIndex = 0;
     let answers = Array(questions.length).fill(null);
     let totalScore = 0;
     let selectedAnswerValue = null;
-
-    // DOM elements
+    // DOM refs
     const welcomeScreen = document.getElementById('welcome-screen');
     const quizScreen = document.getElementById('quiz-screen');
     const resultsScreen = document.getElementById('results-screen');
@@ -105,7 +126,7 @@
     const startQuizButton = document.getElementById('start-quiz-button');
     const progressBar = document.getElementById('progress-bar');
     const questionText = document.getElementById('question-text');
-    const questionTooltip = document.getElementById('question-tooltip');
+    const questionTooltipWrapper = document.getElementById('question-tooltip-wrapper');
     const optionsContainer = document.getElementById('options-container');
     const nextQuestionButton = document.getElementById('next-question-button');
     const feedbackCard = document.getElementById('feedback-card');
@@ -119,107 +140,51 @@
     const modalDescription = document.getElementById('modal-description');
     const modalLink = document.getElementById('modal-link');
     const modalContinueButton = document.getElementById('modal-continue-button');
-
+    
     function displayScreen(screen) {
-      welcomeScreen.classList.add('hidden');
-      quizScreen.classList.add('hidden');
-      resultsScreen.classList.add('hidden');
-      resourceModal.classList.add('hidden');
-      if (screen === 'welcome') welcomeScreen.classList.remove('hidden');
-      if (screen === 'quiz') { quizScreen.classList.remove('hidden'); renderQuestion(); }
-      if (screen === 'results') { resultsScreen.classList.remove('hidden'); displayResults(); }
+      welcomeScreen.classList.add('hidden'); quizScreen.classList.add('hidden'); resultsScreen.classList.add('hidden'); resourceModal.classList.add('hidden');
+      if(screen==='welcome') welcomeScreen.classList.remove('hidden');
+      if(screen==='quiz') { quizScreen.classList.remove('hidden'); renderQuestion(); }
+      if(screen==='results') { resultsScreen.classList.remove('hidden'); displayResults(); }
       lucide.createIcons();
     }
-
     function renderQuestion() {
       const q = questions[currentQuestionIndex];
       questionText.textContent = q.text;
-      questionTooltip.title = q.tooltip;
+      questionTooltipWrapper.setAttribute('title', q.tooltip);
       progressBar.style.width = `${((currentQuestionIndex+1)/questions.length)*100}%`;
       optionsContainer.innerHTML = '';
       selectedAnswerValue = answers[currentQuestionIndex];
-      optionIcons.forEach(opt => {
+      optionIcons.forEach(opt=>{
         const lbl = document.createElement('label');
         lbl.className = selectedAnswerValue===opt.value
           ? 'flex items-center p-4 border-purple-500 bg-purple-100 shadow-md rounded-lg cursor-pointer'
           : 'flex items-center p-4 border-gray-200 bg-white hover:bg-gray-50 rounded-lg cursor-pointer';
         const inp = document.createElement('input'); inp.type='radio'; inp.name=`q-${q.id}`; inp.value=opt.value; inp.checked=selectedAnswerValue===opt.value;
-        inp.className='form-radio h-5 w-5 text-primary'; inp.addEventListener('change', ()=> handleAnswerSelection(opt.value));
-        const span = document.createElement('span');
-        span.className = 'ml-4 text-lg text-gray-800 flex items-center gap-2';
-        span.innerHTML = `<i data-lucide="${opt.icon}" class="lucide ${opt.color}"></i> ${opt.label}`;
-        lbl.append(inp, span);
-        optionsContainer.append(lbl);
+        inp.className='form-radio h-5 w-5 text-primary'; inp.addEventListener('change',()=>handleAnswerSelection(opt.value));
+        const span=document.createElement('span'); span.className='ml-4 text-lg text-gray-800 flex items-center gap-2'; span.innerHTML=`<i data-lucide="${opt.icon}" class="lucide ${opt.color}"></i> ${opt.label}`;
+        lbl.append(inp,span); optionsContainer.append(lbl);
       });
-      nextQuestionButton.disabled = selectedAnswerValue==null;
-      nextQuestionButton.className = selectedAnswerValue==null
+      nextQuestionButton.disabled = selectedAnswerValue===null;
+      nextQuestionButton.className = selectedAnswerValue===null
         ? 'mt-8 px-6 py-3 text-white bg-gray-400 cursor-not-allowed rounded-full'
         : 'mt-8 px-6 py-3 text-white bg-green-600 cursor-pointer rounded-full hover:bg-green-700 hover:scale-105';
       lucide.createIcons();
     }
-
-    function handleAnswerSelection(val) {
-      answers[currentQuestionIndex] = val;
-      renderQuestion();
-    }
-
-    function showResourceModal() {
-      const res = questions[currentQuestionIndex].resource;
-      modalTitle.textContent = res.title;
-      modalDescription.textContent = res.description;
-      if (res.link) { modalLink.href = res.link; modalLink.classList.remove('hidden'); } else modalLink.classList.add('hidden');
-      resourceModal.classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function hideResourceModal() { resourceModal.classList.add('hidden'); }
-
-    function goToNext() {
-      hideResourceModal();
-      if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        renderQuestion();
-      } else {
-        totalScore = answers.reduce((acc, v) => acc + (v||0), 0);
-        displayScreen('results');
-      }
-    }
-
-    function getResultFeedback(score) {
-      if (score <= 20) return { title: "We’re here to help.", message: "Your responses suggest some serious challenges. Consider reaching out for support.", color: 'bg-red-100 text-red-800 border-red-300' };
-      if (score <= 30) return { title: "Let’s work on this together.", message: "There are areas to improve. Small changes and support can help.", color: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
-      if (score <= 40) return { title: "You’re doing fairly well!", message: "Your wellbeing is good, but there's always room to grow.", color: 'bg-green-100 text-green-800 border-green-300' };
-      return { title: "Great work!", message: "You’re showing strong wellbeing. Keep it up!", color: 'bg-blue-100 text-blue-800 border-blue-300' };
-    }
-
-    function displayResults() {
-      const fb = getResultFeedback(totalScore);
-      feedbackTitle.textContent = fb.title;
-      feedbackMessage.textContent = fb.message;
-      feedbackCard.className = `w-full p-8 rounded-2xl border-2 ${fb.color}`;
-      lucide.createIcons();
-    }
-
-    function downloadResults() {
-      // ... download logic here ...
-    }
-
-    function restartQuiz() {
-      currentQuestionIndex = 0;
-      answers = Array(questions.length).fill(null);
-      totalScore = 0;
-      displayScreen('welcome');
-    }
-
-    // Wire up events
-    startQuizButton.addEventListener('click', () => { displayScreen('quiz'); });
-    nextQuestionButton.addEventListener('click', showResourceModal);
-    modalContinueButton.addEventListener('click', goToNext);
-    modalCloseButton.addEventListener('click', hideResourceModal);
-    restartQuizButton.addEventListener('click', restartQuiz);
-
-    // Init
-    window.onload = () => { displayScreen('welcome'); lucide.createIcons(); };
+    function handleAnswerSelection(val){ answers[currentQuestionIndex]=val; renderQuestion(); }
+    function showResourceModal(){ const res=questions[currentQuestionIndex].resource; modalTitle.textContent=res.title; modalDescription.textContent=res.description; if(res.link){ modalLink.href=res.link; modalLink.classList.remove('hidden'); } else modalLink.classList.add('hidden'); resourceModal.classList.remove('hidden'); lucide.createIcons(); }
+    function hideResourceModal(){ resourceModal.classList.add('hidden'); }
+    function goToNext(){ hideResourceModal(); if(currentQuestionIndex<questions.length-1){ currentQuestionIndex++; renderQuestion(); } else { totalScore=answers.reduce((a,v)=>a+(v||0),0); displayScreen('results'); }}
+    function getResultFeedback(score){ if(score<=20) return{title:"We’re here to help.",message:"Your responses suggest some serious challenges. Consider reaching out for support.",color:'bg-red-100 text-red-800 border-red-300'}; if(score<=30) return{title:"Let’s work on this together.",message:"There are areas to improve. Small changes and support can help.",color:'bg-yellow-100 text-yellow-800 border-yellow-300'}; if(score<=40) return{title:"You’re doing fairly well!",message:"Your wellbeing is good, but there's always room to grow.",color:'bg-green-100 text-green-800 border-green-300'}; return{title:"Great work!",message:"You’re showing strong wellbeing. Keep it up!",color:'bg-blue-100 text-blue-800 border-blue-300'}; }
+    function displayResults(){ const fb=getResultFeedback(totalScore); feedbackTitle.textContent=fb.title; feedbackMessage.textContent=fb.message; feedbackCard.className=`w-full p-8 rounded-2xl border-2 ${fb.color}`; lucide.createIcons(); }
+    function restartQuiz(){ currentQuestionIndex=0; answers=Array(questions.length).fill(null); totalScore=0; displayScreen('welcome'); }
+    // Events
+    startQuizButton.addEventListener('click',()=>displayScreen('quiz'));
+    nextQuestionButton.addEventListener('click',showResourceModal);
+    modalContinueButton.addEventListener('click',goToNext);
+    modalCloseButton.addEventListener('click',hideResourceModal);
+    restartQuizButton.addEventListener('click',restartQuiz);
+    window.onload=()=>{ displayScreen('welcome'); lucide.createIcons(); };
   </script>
 </body>
 </html>
