@@ -36,10 +36,10 @@
       <div class="w-full bg-gray-200/50 rounded-full h-3 overflow-hidden mb-6" role="progressbar" aria-valuemin="0" aria-valuemax="100">
         <div id="progress-bar" class="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500"></div>
       </div>
-      <div class="flex items-center mb-8">
+      <div class="flex items-center mb-8 relative">
         <h2 id="question-text" class="text-3xl font-semibold text-gray-800 text-center"></h2>
-        <!-- Tooltip icon with native title attribute -->
-        <i id="question-tooltip" data-lucide="help-circle" class="lucide text-gray-600 ml-2" title=""></i>
+        <!-- Tooltip icon -->
+        <i id="question-tooltip" data-lucide="help-circle" class="lucide text-gray-600 ml-2 cursor-pointer" tabindex="0" aria-label="Question info"></i>
       </div>
       <div id="options-container" class="grid grid-cols-1 gap-4 w-full max-w-md"></div>
       <button id="next-question-button" class="mt-8 px-6 py-3 rounded-full text-white font-bold shadow-lg bg-gray-400 cursor-not-allowed transition-all duration-300" disabled>
@@ -83,6 +83,9 @@
       </div>
     </div>
 
+    <!-- Custom Tooltip (for question info) -->
+    <div id="custom-tooltip" style="display:none; position:absolute; z-index:1000;" class="p-2 bg-gray-800 text-white rounded shadow text-sm max-w-xs"></div>
+
     <!-- Status Message -->
     <div id="message-box" class="mt-6 p-4 bg-white/50 backdrop-blur rounded-xl text-center text-primary font-semibold" role="status"></div>
 
@@ -92,12 +95,60 @@
 
   <!-- Quiz Logic -->
   <script>
-    // Data definitions
+    // Data definitions - example questions (expand as needed)
     const questions = [
-      { id: 1, text: "I feel a sense of belonging within the online university community.", tooltip: "‘Sense of belonging’ means feeling connected to peers in group discussions, online socials, and collaborative activities.", resource: { title: "Building Community Online", description: "Engage in online forums, virtual study groups, and university social events to connect with peers.", link: "https://example.com/community-resources" } },
-      { id: 2, text: "I am able to manage my academic workload without feeling overwhelmed.", tooltip: "Effective workload management involves planning tasks, prioritising deadlines, and taking regular breaks.", resource: { title: "Effective Time Management", description: "Learn strategies like time blocking, prioritizing tasks, and breaking down large assignments.", link: "https://example.com/time-management-tips" } },
-      // ... other questions ...
+      {
+        id: 1,
+        text: "I feel a sense of belonging within the online university community.",
+        tooltip: "‘Sense of belonging’ means feeling connected to peers in group discussions, online socials, and collaborative activities.",
+        resource: {
+          title: "Building Community Online",
+          description: "Engage in online forums, virtual study groups, and university social events to connect with peers.",
+          link: "https://example.com/community-resources"
+        }
+      },
+      {
+        id: 2,
+        text: "I am able to manage my academic workload without feeling overwhelmed.",
+        tooltip: "Effective workload management involves planning tasks, prioritising deadlines, and taking regular breaks.",
+        resource: {
+          title: "Effective Time Management",
+          description: "Learn strategies like time blocking, prioritizing tasks, and breaking down large assignments.",
+          link: "https://example.com/time-management-tips"
+        }
+      },
+      {
+        id: 3,
+        text: "I have access to support when I need it (academic, wellbeing, technical).",
+        tooltip: "Knowing where and how to seek help is essential. Support can include tutors, counselors, IT helpdesks, or peer mentors.",
+        resource: {
+          title: "Finding Support",
+          description: "Discover the range of support services available for students, from academic advisors to mental health resources.",
+          link: "https://example.com/support-services"
+        }
+      },
+      {
+        id: 4,
+        text: "I am able to maintain a healthy study-life balance.",
+        tooltip: "A healthy balance includes time for rest, hobbies, socializing, and self-care alongside academic responsibilities.",
+        resource: {
+          title: "Study-Life Balance",
+          description: "Tips for balancing studies with personal life, avoiding burnout, and enjoying university.",
+          link: "https://example.com/study-life-balance"
+        }
+      },
+      {
+        id: 5,
+        text: "I feel motivated about my studies and future goals.",
+        tooltip: "Motivation can fluctuate. Setting clear, achievable goals and celebrating progress helps maintain it.",
+        resource: {
+          title: "Staying Motivated",
+          description: "Learn how to set goals and stay motivated throughout your academic journey.",
+          link: "https://example.com/motivation"
+        }
+      }
     ];
+
     const optionIcons = [
       { value: 1, label: 'None of the time', icon: 'frown', color: 'text-red-500' },
       { value: 2, label: 'Rarely', icon: 'meh', color: 'text-orange-500' },
@@ -135,6 +186,7 @@
     const modalDescription = document.getElementById('modal-description');
     const modalLink = document.getElementById('modal-link');
     const modalContinueButton = document.getElementById('modal-continue-button');
+    const customTooltip = document.getElementById('custom-tooltip');
 
     // Display appropriate screen
     function displayScreen(screen) {
@@ -152,6 +204,7 @@
     function renderQuestion() {
       const q = questions[currentQuestionIndex];
       questionText.textContent = q.text;
+      // Native browser tooltip for fallback
       questionTooltip.title = q.tooltip;
       progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
       optionsContainer.innerHTML = '';
@@ -183,6 +236,51 @@
       nextQuestionButton.className = selectedAnswerValue === null
         ? 'mt-8 px-6 py-3 text-white bg-gray-400 cursor-not-allowed rounded-full'
         : 'mt-8 px-6 py-3 text-white bg-green-600 cursor-pointer rounded-full hover:bg-green-700 hover:scale-105';
+
+      // Remove previous listeners
+      questionTooltip.onmouseenter = null;
+      questionTooltip.onmouseleave = null;
+      questionTooltip.onmousemove = null;
+      questionTooltip.onfocus = null;
+      questionTooltip.onblur = null;
+      questionTooltip.onclick = null;
+
+      // Custom tooltip handlers (desktop: hover/focus, mobile: click)
+      questionTooltip.onmouseenter = questionTooltip.onfocus = (e) => {
+        customTooltip.textContent = q.tooltip || '';
+        customTooltip.style.display = 'block';
+        positionCustomTooltip(e);
+      };
+      questionTooltip.onmousemove = (e) => {
+        positionCustomTooltip(e);
+      };
+      questionTooltip.onmouseleave = questionTooltip.onblur = () => {
+        customTooltip.style.display = 'none';
+      };
+      questionTooltip.onclick = (e) => {
+        // For mobile: toggle tooltip
+        if (customTooltip.style.display === 'block') {
+          customTooltip.style.display = 'none';
+        } else {
+          customTooltip.textContent = q.tooltip || '';
+          customTooltip.style.display = 'block';
+          positionCustomTooltip(e);
+        }
+      };
+    }
+
+    function positionCustomTooltip(e) {
+      // Position the tooltip near the icon
+      let x = 0, y = 0;
+      if (e.touches && e.touches.length > 0) {
+        x = e.touches[0].pageX;
+        y = e.touches[0].pageY;
+      } else {
+        x = e.pageX;
+        y = e.pageY;
+      }
+      customTooltip.style.left = (x + 12) + 'px';
+      customTooltip.style.top = (y + 12) + 'px';
     }
 
     // Handle answer selection
@@ -234,7 +332,7 @@
       report += `Date: ${new Date().toLocaleString()}\n\n`;
       questions.forEach((q, i) => {
         const opt = optionIcons.find(o => o.value === answers[i]);
-        report += `${i + 1}. ${q.text}\n   Your response: ${opt.label}\n\n`;
+        report += `${i + 1}. ${q.text}\n   Your response: ${opt ? opt.label : 'No response'}\n\n`;
       });
       report += 'Please send this report to wellbeing@university.edu for follow-up and support.\n';
 
@@ -261,9 +359,9 @@
 
     // Show results
     function getResultFeedback(score) {
-      if (score <= 20) return { title: "We’re here to help.", message: "Your responses suggest some serious challenges. Reach out for support.", color: 'bg-red-100 text-red-800 border-red-300' };
-      if (score <= 30) return { title: "Let’s work on this together.", message: "There are areas to improve. Small steps can help.", color: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
-      if (score <= 40) return { title: "You’re doing fairly well!", message: "Your wellbeing is good, but you can build on strengths.", color: 'bg-green-100 text-green-800 border-green-300' };
+      if (score <= 10) return { title: "We’re here to help.", message: "Your responses suggest some serious challenges. Reach out for support.", color: 'bg-red-100 text-red-800 border-red-300' };
+      if (score <= 17) return { title: "Let’s work on this together.", message: "There are areas to improve. Small steps can help.", color: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
+      if (score <= 22) return { title: "You’re doing fairly well!", message: "Your wellbeing is good, but you can build on strengths.", color: 'bg-green-100 text-green-800 border-green-300' };
       return { title: "Great work!", message: "You’re showing strong wellbeing. Keep it up!", color: 'bg-blue-100 text-blue-800 border-blue-300' };
     }
 
